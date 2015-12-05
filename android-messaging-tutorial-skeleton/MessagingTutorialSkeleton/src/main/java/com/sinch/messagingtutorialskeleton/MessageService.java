@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.parse.ParseUser;
 import com.sinch.android.rtc.ClientRegistration;
@@ -29,6 +30,9 @@ public class MessageService extends Service implements SinchClientListener {
     private MessageClient messageClient = null;
     private String currentUserId;
 
+    private Intent broadcastIntent = new Intent("com.sinch.messagingtutorial.app.ListUsersActivity");
+    private LocalBroadcastManager broadcaster;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -40,6 +44,9 @@ public class MessageService extends Service implements SinchClientListener {
         if (currentUserId != null && !isSinchClientStarted()) {
             startSinchClient(currentUserId);
         }
+
+        //onStartCommand
+        broadcaster = LocalBroadcastManager.getInstance(this);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -72,13 +79,22 @@ public class MessageService extends Service implements SinchClientListener {
     //The next 5 methods are for the sinch client listener
     @Override
     public void onClientFailed(SinchClient client, SinchError error) {
+
         sinchClient = null;
+
+        //onClientFailed
+        broadcastIntent.putExtra("success", false);
+        broadcaster.sendBroadcast(broadcastIntent);
     }
 
     @Override
     public void onClientStarted(SinchClient client) {
         client.startListeningOnActiveConnection();
         messageClient = client.getMessageClient();
+
+        //onClientStarted
+        broadcastIntent.putExtra("success", true);
+        broadcaster.sendBroadcast(broadcastIntent);
     }
 
     @Override

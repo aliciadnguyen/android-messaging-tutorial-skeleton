@@ -1,7 +1,13 @@
 package com.sinch.messagingtutorialskeleton;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -29,6 +35,8 @@ public class ListUsersActivity extends Activity {
     ListView usersListView;
     ArrayList<String> names;
     ArrayAdapter<String> namesArrayAdapter;
+    ProgressDialog progressDialog;
+    BroadcastReceiver receiver;
 
 
     @Override
@@ -44,8 +52,33 @@ public class ListUsersActivity extends Activity {
                         R.layout.user_list_item, names);
 
         getUserList(currentUserId, names, usersListView, namesArrayAdapter);
+        createProgressDialog();
+    }
 
 
+    void createProgressDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Loading");
+        progressDialog.setMessage("Please wait...");
+        progressDialog.show();
+
+        //broadcast receiver to listen for the broadcast
+        //from MessageService
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Boolean success = intent.getBooleanExtra("success", false);
+                progressDialog.dismiss();
+
+                //show a toast message if the Sinch
+                //service failed to start
+                if (!success) {
+                    Toast.makeText(getApplicationContext(), "Messaging service failed to start", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver,
+                                          new IntentFilter("com.sinch.messagingtutorial.app.ListUsersActivity"));
     }
 
 
@@ -98,6 +131,10 @@ public class ListUsersActivity extends Activity {
                     Toast.makeText(getApplicationContext(),
                             "Clicked user!",
                             Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
+                    intent.putExtra("RECIPIENT_ID", user.get(0).getObjectId());
+                    startActivity(intent);
 
                 } else {
                     Toast.makeText(getApplicationContext(),

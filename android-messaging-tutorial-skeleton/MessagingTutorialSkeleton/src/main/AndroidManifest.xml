@@ -25,6 +25,7 @@
         </activity>
 
         <activity android:name="com.sinch.messagingtutorialskeleton.ListUsersActivity"></activity>
+        <activity android:name="com.sinch.messagingtutorialskeleton.MessageActivity"></activity>
         <service android:name="com.sinch.messagingtutorialskeleton.MessageService"></service>
     </application>
 
