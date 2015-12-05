@@ -1,6 +1,7 @@
 package com.sinch.messagingtutorialskeleton;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -44,7 +45,23 @@ public class LoginActivity extends Activity {
     }
 
 
+    /*
+     *   To stop the sinch service when app is not in used
+     */
+    @Override
+    public void onDestroy() {
+        stopService(new Intent(this, MessageService.class));
+        super.onDestroy();
+    }
 
+
+    void redirectPage(){
+        final Intent intent = new Intent(getApplicationContext(), ListUsersActivity.class);
+        final Intent serviceIntent = new Intent(getApplicationContext(), MessageService.class);
+
+        startActivity(intent);
+        startService(serviceIntent);
+    }
     /*
      *   Setup parse login
      */
@@ -58,10 +75,9 @@ public class LoginActivity extends Activity {
                 ParseUser.logInInBackground(username, password, new LogInCallback() {
                     public void done(ParseUser user, com.parse.ParseException e) {
                         if (user != null) {
-                            //start next activity
-                            //start sinch service
+                            redirectPage();
                             Toast.makeText(getApplicationContext(),
-                                    "Login clicked!",
+                                    "Login successfully!",
                                     Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(getApplicationContext(),
@@ -93,10 +109,9 @@ public class LoginActivity extends Activity {
                 user.signUpInBackground(new SignUpCallback() {
                     public void done(com.parse.ParseException e) {
                         if (e == null) {
-                            //start next activity
-                            //start sinch service
+                            redirectPage();
                             Toast.makeText(getApplicationContext(),
-                                    "Signup click!",
+                                    "Signup success!",
                                     Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(getApplicationContext(),
